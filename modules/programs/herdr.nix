@@ -62,13 +62,27 @@ in
   config = mkIf cfg.enable {
     home.packages = lib.mkIf (cfg.package != null) [ cfg.package ];
 
+    home.activation.validateHerdrConfig = mkIf (cfg.settings != { }) (
+      lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
+        let
+          configPath = config.xdg.configFile."herdr/config.toml".source;
+          herdr = if cfg.package == null then "herdr" else "${lib.getExe cfg.package}";
+          jq = lib.getExe pkgs.jq;
+        in
+        ''
+          echo "HERDR_CONFIG_PATH: ${configPath}\n"
+          output=$(HERDR_CONFIG_PATH="${configPath}" ${herdr} server reload-config)
+
+          echo "$output" | ${jq} -e '.result.status == "applied"' >/dev/null || {
+            echo "$output" | ${jq} -r '.result.diagnostics[] | gsub("\n"; " ") | gsub(" ; keeping current.*$"; "")' >&2
+            exit 1
+          }
+        ''
+      )
+    );
+
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != { }) {
       source = tomlFormat.generate "herdr-config.toml" cfg.settings;
-      onChange =
-        let
-          binPath = if cfg.package == null then "herdr" else "${lib.getExe cfg.package}";
-        in
-        "${binPath} server reload-config || true";
     };
   };
 }
