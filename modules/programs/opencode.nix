@@ -532,6 +532,11 @@ in
             }
             // mergedSettings
           );
+        validation = {
+          enabled = true;
+          schema = cfg.package.passthru.jsonschema.config;
+          type = "json";
+        };
       };
 
       "opencode/tui.json" = mkIf (cfg.tui != { }) {

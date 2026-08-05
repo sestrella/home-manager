@@ -142,6 +142,35 @@ in
                 link.
               '';
             };
+
+            validation = mkOption {
+              type = types.submodule {
+                options = {
+                  enabled = mkOption {
+                    type = types.bool;
+                    default = false;
+                    description = "";
+                  };
+                  schema = mkOption {
+                    type = types.nullOr types.str;
+                    default = null;
+                    description = "";
+                  };
+                  type = mkOption {
+                    type = types.str;
+                    default = "json";
+                    description = "";
+                  };
+                  extraArgs = mkOption {
+                    type = lib.types.listOf lib.types.str;
+                    default = [ ];
+                    description = "";
+                  };
+                };
+              };
+              default = { };
+              description = "";
+            };
           };
 
           config = {
