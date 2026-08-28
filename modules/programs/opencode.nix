@@ -532,10 +532,14 @@ in
             }
             // mergedSettings
           );
-        validation = {
+        validate = {
           enabled = true;
-          schema = cfg.package.passthru.jsonschema.config;
-          type = "json";
+          validator = { source, extraArgs }: ''
+            ${lib.getExe pkgs.check-jsonschema} \
+              --schemafile ${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
+              ${lib.escapeShellArgs extraArgs} \
+              ${lib.escapeShellArg source}
+          '';
         };
       };
 

@@ -143,7 +143,7 @@ in
               '';
             };
 
-            validation = mkOption {
+            validate = mkOption {
               type = types.submodule {
                 options = {
                   enabled = mkOption {
@@ -151,19 +151,14 @@ in
                     default = false;
                     description = "";
                   };
-                  schema = mkOption {
-                    type = types.nullOr types.str;
-                    default = null;
-                    description = "";
-                  };
-                  type = mkOption {
-                    type = types.str;
-                    default = "json";
-                    description = "";
-                  };
                   extraArgs = mkOption {
                     type = lib.types.listOf lib.types.str;
                     default = [ ];
+                    description = "";
+                  };
+                  validator = mkOption {
+                    type = lib.types.nullOr (lib.types.functionTo lib.types.str);
+                    default = null;
                     description = "";
                   };
                 };

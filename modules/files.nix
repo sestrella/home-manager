@@ -88,25 +88,6 @@ in
       '';
     };
 
-    home.validators = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.functionTo lib.types.str);
-      default = {
-        json =
-          {
-            schema,
-            file,
-            extraArgs,
-          }:
-          ''
-            ${lib.getExe pkgs.check-jsonschema} \
-              --schemafile ${lib.escapeShellArg schema} \
-              ${lib.escapeShellArgs extraArgs} \
-              ${lib.escapeShellArg file}
-          '';
-      };
-      description = "";
-    };
-
     home-files = lib.mkOption {
       type = lib.types.package;
       internal = true;
@@ -424,27 +405,21 @@ in
       ''
     );
 
+    # TODO: change to entryBefore [ "writeBoundary" ]
     home.activation.validateFiles = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
       let
-        files = lib.map (
-          file:
-          file
-          // {
-            validator =
-              let
-                foo = builtins.tryEval (cfg.home.validators.${file.validation.type});
-              in
-              if foo.success then foo.value else lib.warn "";
-          }
-        ) (lib.filter ({ validation, ... }: validation.enabled && validation.schema != null) cfg);
+        filesWithValidators = (
+          lib.filter ({ validate, ... }: validate.enabled && validate.validator != null) cfg
+        );
       in
       lib.concatStringsSep "\n" (
-        lib.map (file: ''
-          ${lib.getExe pkgs.check-jsonschema} \
-            --schemafile ${lib.escapeShellArg file.validation.schema} \
-            ${lib.escapeShellArgs file.validation.extraArgs} \
-            ${lib.escapeShellArg (sourceStorePath file)}
-        '') files
+        lib.map (
+          { source, validate, ... }:
+          (validate.validator {
+            inherit source;
+            extraArgs = validate.extraArgs;
+          })
+        ) filesWithValidators
       )
     );
 
