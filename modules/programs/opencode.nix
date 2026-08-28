@@ -463,6 +463,12 @@ in
         }
       '';
     };
+
+    validateFiles = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -533,7 +539,7 @@ in
             // mergedSettings
           );
         validate = {
-          enabled = true;
+          enabled = cfg.validateFiles;
           validator = { source, extraArgs }: ''
             ${lib.getExe pkgs.check-jsonschema} \
               --schemafile ${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \

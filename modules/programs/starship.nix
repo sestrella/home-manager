@@ -115,6 +115,12 @@ in
         Relative path to the user's home directory where the Starship config should be stored.
       '';
     };
+
+    validateFiles = mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -159,6 +165,15 @@ in
                     ${settingsFile} \
                     > $out
                 '';
+            validate = {
+              enabled = cfg.validateFiles;
+              validator = { source, extraArgs }: ''
+                ${lib.getExe pkgs.check-jsonschema} \
+                  --schemafile ${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
+                  ${lib.escapeShellArgs extraArgs} \
+                  ${lib.escapeShellArg source}
+              '';
+            };
           }
       );
 
