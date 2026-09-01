@@ -420,7 +420,7 @@ in
             };
           in
           ''
-            echo "Validating ${source} (x/${lib.toString (lib.length filesWithValidators)})..."
+            echo "Validating ${source}..."
             ${validator}
           ''
         ) filesWithValidators

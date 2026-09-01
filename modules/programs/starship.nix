@@ -146,7 +146,7 @@ in
 
       file.${cfg.configPath} = mkIf hasGeneratedConfig (
         let
-          settingsFile = tomlFormat.generate "starship-config" cfg.settings;
+          settingsFile = tomlFormat.generate "starship-config.toml" cfg.settings;
           validate = {
             enabled = cfg.validateFiles;
             validator = { source }: ''
