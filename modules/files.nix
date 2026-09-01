@@ -405,7 +405,7 @@ in
       ''
     );
 
-    home.activation.validateFiles = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+    home.activation.validateFiles = lib.hm.dag.entryBefore [ "linkGeneration" ] (
       lib.concatMapStrings (
         {
           source,
@@ -419,16 +419,10 @@ in
           };
         in
         ''
-          if (( ''${changedFiles[${lib.escapeShellArg target}]} == 1 )); then
-            if [[ -v DRY_RUN || -v VERBOSE ]]; then
-              echo "Running validate hook for ${lib.escapeShellArg target}" >&2
-            fi
-            if [[ ! -v DRY_RUN ]]; then
-              {
-                ${validator}
-              } >&2
-            fi
-          fi
+          {
+            echo "Running validate hook for ${lib.escapeShellArg target}"
+            ${validator}
+          } >&2
         ''
       ) (lib.filter ({ validate, ... }: validate.enabled && validate.validator != null) cfg)
     );
