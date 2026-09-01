@@ -147,11 +147,23 @@ in
       file.${cfg.configPath} = mkIf hasGeneratedConfig (
         let
           settingsFile = tomlFormat.generate "starship-config" cfg.settings;
+          validate = {
+            enabled = cfg.validateFiles;
+            validator = { source }: ''
+              ${lib.getExe pkgs.check-jsonschema} \
+                --schemafile=${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
+                ${lib.escapeShellArg source}
+            '';
+          };
         in
         if cfg.presets == [ ] then
-          { source = settingsFile; }
+          {
+            inherit validate;
+            source = settingsFile;
+          }
         else
           {
+            inherit validate;
             source =
               pkgs.runCommand "starship.toml"
                 {
@@ -165,14 +177,6 @@ in
                     ${settingsFile} \
                     > $out
                 '';
-            validate = {
-              enabled = cfg.validateFiles;
-              validator = { source }: ''
-                ${lib.getExe pkgs.check-jsonschema} \
-                  --schemafile=${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
-                  ${lib.escapeShellArg source}
-              '';
-            };
           }
       );
 

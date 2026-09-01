@@ -405,19 +405,24 @@ in
       ''
     );
 
-    # TODO: change to entryBefore [ "writeBoundary" ]
-    home.activation.validateFiles = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
+    home.activation.validateFiles = lib.hm.dag.entryBefore [ "linkGeneration" ] (
       let
-        filesWithValidators = (
-          lib.filter ({ validate, ... }: validate.enabled && validate.validator != null) cfg
-        );
+        filesWithValidators = lib.filter (
+          { validate, ... }: validate.enabled && validate.validator != null
+        ) cfg;
       in
       lib.concatStringsSep "\n" (
         lib.map (
           { source, validate, ... }:
-          validate.validator {
-            inherit source;
-          }
+          let
+            validator = validate.validator {
+              inherit source;
+            };
+          in
+          ''
+            echo "Validating ${source} (x/${lib.toString (lib.length filesWithValidators)})..."
+            ${validator}
+          ''
         ) filesWithValidators
       )
     );

@@ -151,11 +151,6 @@ in
                     default = false;
                     description = "";
                   };
-                  extraArgs = mkOption {
-                    type = lib.types.listOf lib.types.str;
-                    default = [ ];
-                    description = "";
-                  };
                   validator = mkOption {
                     type = lib.types.nullOr (lib.types.functionTo lib.types.str);
                     default = null;
