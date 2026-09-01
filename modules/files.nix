@@ -405,26 +405,32 @@ in
       ''
     );
 
-    home.activation.validateFiles = lib.hm.dag.entryBefore [ "linkGeneration" ] (
-      let
-        filesWithValidators = lib.filter (
-          { validate, ... }: validate.enabled && validate.validator != null
-        ) cfg;
-      in
-      lib.concatStringsSep "\n" (
-        lib.map (
-          { source, validate, ... }:
-          let
-            validator = validate.validator {
-              inherit source;
-            };
-          in
-          ''
-            echo "Validating ${source}..."
-            ${validator}
-          ''
-        ) filesWithValidators
-      )
+    home.activation.validateFiles = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+      lib.concatMapStrings (
+        {
+          source,
+          target,
+          validate,
+          ...
+        }:
+        let
+          validator = validate.validator {
+            inherit source;
+          };
+        in
+        ''
+          if (( ''${changedFiles[${lib.escapeShellArg target}]} == 1 )); then
+            if [[ -v DRY_RUN || -v VERBOSE ]]; then
+              echo "Running validate hook for ${lib.escapeShellArg target}" >&2
+            fi
+            if [[ ! -v DRY_RUN ]]; then
+              {
+                ${validator}
+              } >&2
+            fi
+          fi
+        ''
+      ) (lib.filter ({ validate, ... }: validate.enabled && validate.validator != null) cfg)
     );
 
     home.activation.onFilesChange = lib.hm.dag.entryAfter [ "linkGeneration" ] (
