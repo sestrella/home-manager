@@ -415,10 +415,9 @@ in
       lib.concatStringsSep "\n" (
         lib.map (
           { source, validate, ... }:
-          (validate.validator {
+          validate.validator {
             inherit source;
-            extraArgs = validate.extraArgs;
-          })
+          }
         ) filesWithValidators
       )
     );

@@ -540,10 +540,9 @@ in
           );
         validate = {
           enabled = cfg.validateFiles;
-          validator = { source, extraArgs }: ''
+          validator = { source }: ''
             ${lib.getExe pkgs.check-jsonschema} \
-              --schemafile ${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
-              ${lib.escapeShellArgs extraArgs} \
+              --schemafile=${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
               ${lib.escapeShellArg source}
           '';
         };
