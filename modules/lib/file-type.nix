@@ -163,6 +163,13 @@ in
                       the file source as an argument and should raise an error
                       if validation fails.
                     '';
+                    example = lib.literalExpression ''
+                      { source }: '''
+                        $${lib.getExe pkgs.check-jsonschema} \
+                          --schemafile=$${lib.escapeShellArg cfg.package.passthru.jsonschema.config} \
+                          $${lib.escapeShellArg source}
+                      '''
+                    '';
                   };
                 };
               };
