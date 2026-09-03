@@ -149,17 +149,29 @@ in
                   enabled = mkOption {
                     type = types.bool;
                     default = false;
-                    description = "";
+                    description = ''
+                      Whether to enable validation for this file. When enabled,
+                      the validator function will be called to check the file
+                      contents.
+                    '';
                   };
                   validator = mkOption {
                     type = lib.types.nullOr (lib.types.functionTo lib.types.str);
                     default = null;
-                    description = "";
+                    description = ''
+                      A function that validates the file. The function receives
+                      the file source as an argument and should raise an error
+                      if validation fails.
+                    '';
                   };
                 };
               };
               default = { };
-              description = "";
+              description = ''
+                Validation options for this file. When enabled, allows running
+                a custom validator function to check the file contents after
+                it has been linked.
+              '';
             };
           };
 
