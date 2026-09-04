@@ -9,4 +9,8 @@
   files-target-conflict = ./target-conflict.nix;
   files-target-with-shellvar = ./target-with-shellvar.nix;
   files-text = ./text.nix;
+  files-validate-files-disabled-validator-null = ./validate-files-disabled-validator-null.nix;
+  files-validate-files-disabled-validator-set = ./validate-files-disabled-validator-set.nix;
+  files-validate-files-enabled-validator-null = ./validate-files-enabled-validator-null.nix;
+  files-validate-files-enabled-validator-set = ./validate-files-enabled-validator-set.nix;
 }
