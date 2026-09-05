@@ -1,13 +1,21 @@
+{ config, pkgs, ... }:
+
 {
   home.file."test-file" = {
     text = "test content";
-    validate = {
-      enabled = false;
-      validator = { source }: "echo 'should not run'";
-    };
+    validate.validator = { source }: "echo 'validated ${source}'";
   };
 
-  nmt.script = ''
-    assertFileNotRegex activate 'Running validate hook for.*test-file'
-  '';
+  nmt.script =
+    let
+      activationScript = pkgs.writeScript "activation" config.home.activation.validateFiles.data;
+    in
+    ''
+      substitute ${activationScript} $TMPDIR/activate --subst-var TMPDIR
+      chmod +x $TMPDIR/activate
+      assertFileIsExecutable "$TMPDIR/activate"
+
+      $TMPDIR/activate &> $TMPDIR/output
+      assertFileNotRegex "$TMPDIR/output" "validated /nix/store/.*-hm_testfile"
+    '';
 }
